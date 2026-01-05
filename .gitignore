@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 .venv/
+uv.lock
 .env
 
 # Runtime state
@@ -15,4 +16,8 @@ logs/
 
 # Secrets
 config.local.yaml
+
+
+
+
 
