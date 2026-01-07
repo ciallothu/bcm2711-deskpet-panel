@@ -7,6 +7,7 @@ display:
   page_cycle_seconds: 10
   fps_idle: 1
   fps_pet: 8
+  fps_video: 10
 
 network:
   connect_test_host: "1.1.1.1"
