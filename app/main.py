@@ -10,6 +10,7 @@ Desk Pet Panel (Raspberry Pi + 2inch SPI LCD 240x320)
 - Network probe (simple connect test)
 """
 
+import argparse
 import os
 import signal
 import socket
@@ -136,8 +137,21 @@ def _handle_signal(signum, frame):
     _stop = True
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Desk Pet Panel")
+    parser.add_argument(
+        "-v",
+        "-vivian",
+        dest="video_only",
+        action="store_true",
+        help="play video frames only",
+    )
+    return parser.parse_args()
+
+
 def main():
     global _stop
+    args = _parse_args()
     signal.signal(signal.SIGINT, _handle_signal)
     signal.signal(signal.SIGTERM, _handle_signal)
 
@@ -169,7 +183,10 @@ def main():
         fps=CONFIG["display"].get("fps_video", 10),
     )
     if video_player.available:
-        pages.insert(0, "video")
+        if args.video_only:
+            pages = ["video"]
+        else:
+            pages.insert(0, "video")
 
     try:
         while not _stop:
