@@ -11,6 +11,7 @@ Desk Pet Panel (Raspberry Pi + 2inch SPI LCD 240x320)
 """
 
 import argparse
+import importlib.metadata
 import os
 import signal
 import socket
@@ -33,7 +34,13 @@ from config_loader import load_config
 from app.models import Snapshot
 from app.services.quote_service import QuoteService
 from app.services.weather_service import WeatherService
-from app.ui.pages import render_clock_page, render_status_page, render_video_page, render_weather_page
+from app.ui.pages import (
+    render_clock_page,
+    render_quote_page,
+    render_status_page,
+    render_video_page,
+    render_weather_page,
+)
 from app.ui.pet_display import PetRenderer, load_pet_sprites
 from app.ui.ticker_display import Ticker
 from app.ui.video.player import VideoPlayer
@@ -137,21 +144,37 @@ def _handle_signal(signum, frame):
     _stop = True
 
 
+def _app_version() -> str:
+    try:
+        return importlib.metadata.version("bcm2711-deskpet-panel")
+    except importlib.metadata.PackageNotFoundError:
+        return "unknown"
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Desk Pet Panel")
-    parser.add_argument(
-        "-v",
-        "-vivian",
-        dest="video_only",
-        action="store_true",
-        help="play video frames only",
-    )
+    parser.add_argument("-help", action="help", help="show this help message and exit")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-v", "-vivian", dest="video_only", action="store_true", help="vivian video")
+    group.add_argument("-w", dest="weather_only", action="store_true", help="weather only")
+    group.add_argument("-q", dest="quotes_only", action="store_true", help="quotes only")
+    group.add_argument("-c", dest="clock_only", action="store_true", help="clock only")
     return parser.parse_args()
 
 
 def main():
     global _stop
     args = _parse_args()
+    if not any((args.video_only, args.weather_only, args.quotes_only, args.clock_only)):
+        version = _app_version()
+        print(f"Desk Pet Panel {version}")
+        print("Options:")
+        print("  -h, -help  help")
+        print("  -v, -vivian  vivian")
+        print("  -w  weather")
+        print("  -q  quotes")
+        print("  -c  clock")
+        return
     signal.signal(signal.SIGINT, _handle_signal)
     signal.signal(signal.SIGTERM, _handle_signal)
 
@@ -182,11 +205,19 @@ def main():
         size=(CONFIG["display"]["w"], CONFIG["display"]["h"]),
         fps=CONFIG["display"].get("fps_video", 10),
     )
-    if video_player.available:
-        if args.video_only:
-            pages = ["video"]
-        else:
-            pages.insert(0, "video")
+    if args.video_only:
+        if not video_player.available:
+            print("No video frames found under app/ui/pictures.")
+            return
+        pages = ["video"]
+    elif args.weather_only:
+        pages = ["weather"]
+    elif args.quotes_only:
+        pages = ["quotes"]
+    elif args.clock_only:
+        pages = ["clock"]
+    elif video_player.available:
+        pages.insert(0, "video")
 
     try:
         while not _stop:
@@ -225,6 +256,7 @@ def main():
             p = pages[page_idx]
             frame_renderers = {
                 "clock": lambda: render_clock_page(snap, ticker, pet_renderer, CONFIG["display"]),
+                "quotes": lambda: render_quote_page(snap, ticker, CONFIG["display"]),
                 "weather": lambda: render_weather_page(snap, ticker, CONFIG["display"]),
                 "status": lambda: render_status_page(snap, ticker, CONFIG["display"]),
                 "video": lambda: render_video_page(snap, ticker, video_player, CONFIG["display"]),

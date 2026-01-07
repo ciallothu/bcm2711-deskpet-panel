@@ -166,3 +166,35 @@ def render_video_page(
             y = (h - target[1]) // 2
             img.paste(fitted, (x, y))
     return img
+
+
+def render_quote_page(snap: Snapshot, ticker: Ticker, display_cfg: dict) -> Image.Image:
+    w, h = display_cfg["w"], display_cfg["h"]
+    img = Image.new("RGB", (w, h), (0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    font_mid = load_font(22)
+    text = ticker.text
+    if not text:
+        text = "No quotes yet."
+    max_width = w - 20
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        tentative = f"{current} {word}".strip()
+        if draw.textlength(tentative, font=font_mid) <= max_width:
+            current = tentative
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    total_height = len(lines) * 28
+    y = max(10, (h - total_height) // 2)
+    for line in lines:
+        line_width = draw.textlength(line, font=font_mid)
+        x = (w - line_width) // 2
+        draw.text((x, y), line, font=font_mid, fill=(255, 255, 255))
+        y += 28
+    return img
