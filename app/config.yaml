@@ -37,6 +37,9 @@ shwg:
 ui:
   ticker_height: 24
   ticker_speed_px_per_s: 40
+  font_paths:
+    - "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"
+    - "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
 
 paths:
   state_dir: "~/.cache/deskpet-panel"
