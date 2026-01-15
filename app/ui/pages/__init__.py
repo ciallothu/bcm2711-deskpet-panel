@@ -46,7 +46,7 @@ def render_clock_page(
 
     # quick weather hint
     if snap.weather.now.ok:
-        wline = f"{snap.weather.now.location_name} {snap.weather.now.temp_c}° {snap.weather.now.text}"
+        wline = f"{snap.weather.now.location_name} {snap.weather.now.temp_c}C {snap.weather.now.text}"
         if snap.weather.now.stale:
             wline += " ~"
         draw.text((12, 148), wline[:22], font=font_mid, fill=(255, 255, 255))
@@ -72,7 +72,7 @@ def render_weather_page(snap: Snapshot, ticker: Ticker, display_cfg: dict) -> Im
 
     if snap.weather.now.ok:
         draw.text((10, 80), f"{snap.weather.now.location_name}", font=font_mid, fill=(255, 255, 255))
-        draw.text((10, 130), f"{snap.weather.now.temp_c}°", font=font_big, fill=(255, 255, 255))
+        draw.text((10, 130), f"{snap.weather.now.temp_c}C", font=font_big, fill=(255, 255, 255))
         draw.text((120, 146), f"{snap.weather.now.text}", font=font_mid, fill=(255, 255, 255))
 
         meta = f"obs:{snap.weather.now.obs_time[-14:]} upd:{snap.weather.now.update_time[-14:]}"
@@ -114,7 +114,7 @@ def render_status_page(snap: Snapshot, ticker: Ticker, display_cfg: dict) -> Ima
         y += 34
 
     if snap.weather.now.ok:
-        draw.text((10, y + 10), f"W: {snap.weather.now.temp_c}° {snap.weather.now.text}" + (" ~" if snap.weather.now.stale else ""),
+        draw.text((10, y + 10), f"W: {snap.weather.now.temp_c}C {snap.weather.now.text}" + (" ~" if snap.weather.now.stale else ""),
                   font=font_mid, fill=(255, 255, 255))
 
     ticker.draw(img, font_small)
@@ -203,14 +203,14 @@ def render_weekly_weather_page(snap: Snapshot, ticker: Ticker, display_cfg: dict
     weekday_map = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     for idx, day in enumerate(daily):
         y = start_y + idx * row_h
-        date_label = day.date[5:] if len(day.date) >= 5 else day.date
+        date_label = day.date
         try:
             dt = datetime.strptime(day.date, "%Y-%m-%d")
             weekday = weekday_map[dt.weekday()]
-            date_label = f"{weekday} {date_label}"
+            date_label = weekday
         except Exception:
             pass
-        temp_label = f"{day.temp_min}~{day.temp_max}°"
+        temp_label = f"{day.temp_min}~{day.temp_max}C"
         draw.text((10, y), date_label, font=font_small, fill=(255, 255, 255))
         draw.text((90, y), day.text_day[:10], font=font_small, fill=(255, 255, 255))
         temp_w = draw.textlength(temp_label, font=font_small)
@@ -238,7 +238,7 @@ def render_dashboard_page(snap: Snapshot, ticker: Ticker, display_cfg: dict) -> 
 
     weather_line = "Weather: -"
     if snap.weather.now.ok:
-        weather_line = f"{snap.weather.now.location_name} {snap.weather.now.temp_c}° {snap.weather.now.text}"
+        weather_line = f"{snap.weather.now.location_name} {snap.weather.now.temp_c}C {snap.weather.now.text}"
         if snap.weather.now.stale:
             weather_line += " ~"
     draw.text((10, 110), weather_line[:28], font=font_mid, fill=(255, 255, 255))
