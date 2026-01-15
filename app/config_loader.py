@@ -45,6 +45,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "ui": {
         "ticker_height": 24,
         "ticker_speed_px_per_s": 40,
+        "font_paths": [],
     },
     "paths": {
         "state_dir": os.path.expanduser("~/.cache/deskpet-panel"),
@@ -103,6 +104,8 @@ def _normalize_ui(cfg: Dict[str, Any]) -> None:
     ticker = cfg.get("ticker", {})
     if "ticker_speed_px_per_s" not in ui and "speed_px_per_s" in ticker:
         ui["ticker_speed_px_per_s"] = ticker["speed_px_per_s"]
+    if "font_paths" in ui and not isinstance(ui["font_paths"], list):
+        ui["font_paths"] = [ui["font_paths"]]
     cfg["ui"] = ui
 
 

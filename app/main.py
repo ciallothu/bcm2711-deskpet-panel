@@ -47,10 +47,12 @@ from app.ui.pages import (
     render_weather_page,
     render_weekly_weather_page,
 )
+from app.ui.fonts import set_font_paths
 from app.ui.ticker_display import Ticker
 from app.ui.video.player import VideoPlayer
 
 CONFIG = load_config(os.path.join(os.path.dirname(__file__), "config.yaml"))
+set_font_paths(CONFIG.get("ui", {}).get("font_paths", []))
 
 # -----------------------------
 # Helpers
